@@ -69,18 +69,21 @@ async function Home() {
         </div>
         <div
         >
-          <Animecard data={herodata} cardid="Trending Now" />
-        </div>
-        <div
-        >
-          <Animecard data={populardata} cardid="All Time Popular" />
-        </div>
-        <div
-        >
-          <div className='lg:flex lg:flex-row justify-between lg:gap-20'>
-            <VerticalList data={top100data} mobiledata={seasonaldata} id="Top 100 Anime" />
-            <VerticalList data={seasonaldata} id="Seasonal Anime" />
-          </div>
+<div>
+  <Animecard data={herodata} cardid="Trending Now" />
+</div>
+<div>
+  <Animecard data={populardata} cardid="All Time Popular" />
+</div>
+<div>
+  <SchedulesWidget />
+</div>
+<div>
+  <div className='lg:flex lg:flex-row justify-between lg:gap-20'>
+    <VerticalList data={top100data} mobiledata={seasonaldata} id="Top 100 Anime" />
+    <VerticalList data={seasonaldata} id="Seasonal Anime" />
+  </div>
+</div>
         </div>
       </div>
     </div>
