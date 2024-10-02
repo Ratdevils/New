@@ -1,3 +1,4 @@
+import './SchedulesWidget.css'; // Adjust the path if necessary
 import React, { useState, useEffect } from 'react';
 
 const SchedulesWidget = () => {
