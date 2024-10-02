@@ -1,224 +1,70 @@
-import React, { useEffect, useState } from 'react';
-import './SchedulesWidget.css'; // Ensure the correct path
+import React, { useState, useEffect } from 'react';
+import './SchedulesWidget.css';
 
 const SchedulesWidget = () => {
-    const [episodes, setEpisodes] = useState([]);
-    const [activeDay, setActiveDay] = useState('monday');
+  const [scheduleData, setScheduleData] = useState({});
+  const [activeDay, setActiveDay] = useState('mon'); // Changed to lowercase for consistency
+  const [loading, setLoading] = useState(true); // Added loading state
+  const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
-    useEffect(() => {
-        const url = 'https://consumetapi-eight.vercel.app/meta/anilist/airing-schedule';
+  useEffect(() => {
+    // Fetch API data for airing schedule
+    const url = 'https://consumetapi-eight.vercel.app/meta/anilist/airing-schedule';
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        setScheduleData(data);
+        setLoading(false); // Set loading to false after fetching
+      })
+      .catch((error) => {
+        console.error('Error fetching schedule:', error);
+        setLoading(false); // Stop loading on error
+      });
+  }, []);
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => setEpisodes(data.results))
-            .catch(error => console.error('Error fetching data:', error));
-    }, []);
+  const handleDayClick = (day) => {
+    setActiveDay(day);
+  };
 
-    const showDay = (day) => {
-        setActiveDay(day);
-    };
-
-    const getEpisodesForDay = (day) => {
-        const dayEpisodes = episodes.filter(anime => {
-            const airingTime = new Date(anime.airingAt * 1000);
-            return airingTime.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() === day;
-        });
-        return dayEpisodes;
-    };
-
-    return (
-        <div className="schedule-widget">
-            <h2>Estimated Schedule</h2>
-            <div className="tabs">
-                {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
-                    <button 
-                        key={day} 
-                        onClick={() => showDay(day)} 
-                        className={activeDay === day ? 'active' : ''}
-                    >
-                        {day.charAt(0).toUpperCase() + day.slice(1, 3)}
-                    </button>
-                ))}
+  return (
+    <div className="schedules-widget">
+      <div className="widget-header">
+        <h2>Estimated Schedule</h2>
+        <span className="header-arrow">></span>
+      </div>
+      <div className="days-nav">
+        {days.map((day) => (
+          <div
+            key={day}
+            className={`day-item ${activeDay === day ? 'active' : ''}`}
+            onClick={() => handleDayClick(day)}
+          >
+            {day.toUpperCase()}
+          </div>
+        ))}
+      </div>
+      <div className="schedule-list">
+        {loading ? ( // Conditional rendering for loading
+          <p>Loading...</p>
+        ) : (
+          scheduleData[activeDay]?.map((item) => (
+            <div key={item.id} className="schedule-item">
+              <div className="time">{item.time}</div>
+              <div className="details">
+                <img className="thumbnail" src={item.image} alt={item.title} />
+                <div className="title">{item.title}</div>
+              </div>
+              <div className="episode-box">
+                <a href={`/episode/${item.id}`} className="episode-link">
+                  Ep {item.episode}
+                </a>
+              </div>
             </div>
-            <div className="days-container">
-                <div className="day-tab" id="monday">
-                    <h3>Monday</h3>
-                    <div className="episode-list">
-                        {getEpisodesForDay('monday').map(anime => {
-                            const airingTime = new Date(anime.airingAt * 1000);
-                            return (
-                                <a 
-                                    href={`your-episode-url/${anime.id}`} 
-                                    className="episode-item" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    key={anime.id}
-                                >
-                                    <img src={anime.image} alt={anime.title.romaji} />
-                                    <div className="episode-details">
-                                        <h4>{anime.title.romaji}</h4>
-                                        <p>Episode {anime.episode}</p>
-                                        <p>Airs at: {airingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <p>{anime.genres.join(', ')}</p>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-                <div className="day-tab" id="tuesday">
-                    <h3>Tuesday</h3>
-                    <div className="episode-list">
-                        {getEpisodesForDay('tuesday').map(anime => {
-                            const airingTime = new Date(anime.airingAt * 1000);
-                            return (
-                                <a 
-                                    href={`your-episode-url/${anime.id}`} 
-                                    className="episode-item" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    key={anime.id}
-                                >
-                                    <img src={anime.image} alt={anime.title.romaji} />
-                                    <div className="episode-details">
-                                        <h4>{anime.title.romaji}</h4>
-                                        <p>Episode {anime.episode}</p>
-                                        <p>Airs at: {airingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <p>{anime.genres.join(', ')}</p>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-                <div className="day-tab" id="wednesday">
-                    <h3>Wednesday</h3>
-                    <div className="episode-list">
-                        {getEpisodesForDay('wednesday').map(anime => {
-                            const airingTime = new Date(anime.airingAt * 1000);
-                            return (
-                                <a 
-                                    href={`your-episode-url/${anime.id}`} 
-                                    className="episode-item" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    key={anime.id}
-                                >
-                                    <img src={anime.image} alt={anime.title.romaji} />
-                                    <div className="episode-details">
-                                        <h4>{anime.title.romaji}</h4>
-                                        <p>Episode {anime.episode}</p>
-                                        <p>Airs at: {airingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <p>{anime.genres.join(', ')}</p>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-                <div className="day-tab" id="thursday">
-                    <h3>Thursday</h3>
-                    <div className="episode-list">
-                        {getEpisodesForDay('thursday').map(anime => {
-                            const airingTime = new Date(anime.airingAt * 1000);
-                            return (
-                                <a 
-                                    href={`your-episode-url/${anime.id}`} 
-                                    className="episode-item" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    key={anime.id}
-                                >
-                                    <img src={anime.image} alt={anime.title.romaji} />
-                                    <div className="episode-details">
-                                        <h4>{anime.title.romaji}</h4>
-                                        <p>Episode {anime.episode}</p>
-                                        <p>Airs at: {airingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <p>{anime.genres.join(', ')}</p>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-                <div className="day-tab" id="friday">
-                    <h3>Friday</h3>
-                    <div className="episode-list">
-                        {getEpisodesForDay('friday').map(anime => {
-                            const airingTime = new Date(anime.airingAt * 1000);
-                            return (
-                                <a 
-                                    href={`your-episode-url/${anime.id}`} 
-                                    className="episode-item" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    key={anime.id}
-                                >
-                                    <img src={anime.image} alt={anime.title.romaji} />
-                                    <div className="episode-details">
-                                        <h4>{anime.title.romaji}</h4>
-                                        <p>Episode {anime.episode}</p>
-                                        <p>Airs at: {airingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <p>{anime.genres.join(', ')}</p>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-                <div className="day-tab" id="saturday">
-                    <h3>Saturday</h3>
-                    <div className="episode-list">
-                        {getEpisodesForDay('saturday').map(anime => {
-                            const airingTime = new Date(anime.airingAt * 1000);
-                            return (
-                                <a 
-                                    href={`your-episode-url/${anime.id}`} 
-                                    className="episode-item" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    key={anime.id}
-                                >
-                                    <img src={anime.image} alt={anime.title.romaji} />
-                                    <div className="episode-details">
-                                        <h4>{anime.title.romaji}</h4>
-                                        <p>Episode {anime.episode}</p>
-                                        <p>Airs at: {airingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <p>{anime.genres.join(', ')}</p>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-                <div className="day-tab" id="sunday">
-                    <h3>Sunday</h3>
-                    <div className="episode-list">
-                        {getEpisodesForDay('sunday').map(anime => {
-                            const airingTime = new Date(anime.airingAt * 1000);
-                            return (
-                                <a 
-                                    href={`your-episode-url/${anime.id}`} 
-                                    className="episode-item" 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
-                                    key={anime.id}
-                                >
-                                    <img src={anime.image} alt={anime.title.romaji} />
-                                    <div className="episode-details">
-                                        <h4>{anime.title.romaji}</h4>
-                                        <p>Episode {anime.episode}</p>
-                                        <p>Airs at: {airingTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <p>{anime.genres.join(', ')}</p>
-                                    </div>
-                                </a>
-                            );
-                        })}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+          ))
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default SchedulesWidget;
